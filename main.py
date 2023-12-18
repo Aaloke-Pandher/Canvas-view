@@ -21,18 +21,33 @@ class Player():
         self.h = h  
         self.view = 0 
         self.dx = 5 
-        self.dy = 10
-        self.accel = 0.1
+        self.dy = 0
+        self.accel = 0.5
+
     def update(self):
+        # Movement 
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.x -= self.dx
+        if keys[pygame.K_RIGHT]: 
+            self.x += self.dx  
+        
+        # Update view
         self.view = self.x - 400 
-        player.y += player.accel
+
+        # Move Vertically
+        self.dy += self.accel
+        self.y += self.dy
+
     def drawPlayer(self, screen): 
         pygame.draw.rect(screen, Blue, [self.x - self.view, self.y, self.w, self.h])  
+
     def limitView(self):
         if self.view < 0:
             self.view = 0 
         elif self.view > WorldWidth - Screen_width:
             self.view = WorldWidth - Screen_width 
+
     def limitPlayer(self):
         if self.x < 0:
             self.x = 0 
@@ -49,6 +64,7 @@ class Platform():
         self.w = w 
         self.x = x 
         self.y = y 
+
     def drawPlatform(self, screen, player):
         pygame.draw.rect(screen, Grey, [self.x - player.view, self.y, self.w, self.h]) 
 
@@ -85,19 +101,10 @@ def main():
         # Main event loop
         for event in pygame.event.get(): 
             if event.type == pygame.QUIT: 
-                done = True 
-
-        # Movement 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            player.x -= player.dx
-        if keys[pygame.K_RIGHT]: 
-            player.x += player.dx  
-        
-        # Jump 
-        if keys[pygame.K_UP]: 
-            player.dy -= player.accel
-            player.y -= player.dy  
+                done = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    player.dy = -10
 
         # Logic 
         player.update() 
@@ -110,9 +117,8 @@ def main():
         for i in range(len(platforms)):
             platforms[i].drawPlatform(screen, player) 
             if rectCollision(player, platforms[i]):
-                player.y = platforms[i].y - platforms[i].h 
-                player.x = platforms[i].x + platforms[i].w / 2 
-                player.dy = 10
+                player.y = platforms[i].y - platforms[i].h  
+                player.dy = 0
         pygame.display.flip() 
 
         # --- Limit frames
